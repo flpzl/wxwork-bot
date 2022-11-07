@@ -2,6 +2,7 @@ package wxworkbot
 
 import (
 	"bytes"
+	"crypto/tls"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -29,12 +30,18 @@ type WxWorkBot struct {
 
 // 创建一个新的机器人实例
 func New(botKey string) *WxWorkBot {
+	tr := &http.Transport{
+		TLSClientConfig:    &tls.Config{InsecureSkipVerify: true},
+	}
 	bot := WxWorkBot{
 		Key: botKey,
 		// 直接拼接出接口 URL
 		WebHookUrl: fmt.Sprintf(defaultWebHookUrlTemplate, botKey),
 		// 默认 5 秒超时
-		Client: &http.Client{Timeout: 5 * time.Second},
+		Client: &http.Client{
+			Timeout: 5 * time.Second,
+			Transport: tr,
+		},
 	}
 	return &bot
 }
